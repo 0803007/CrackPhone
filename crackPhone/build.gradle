@@ -1,0 +1,31 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 16
+    buildToolsVersion "23.0.2"
+
+    compileOptions.encoding = "BIG5"
+
+    defaultConfig {
+        applicationId "nchc.crackphone"
+        minSdkVersion 16
+        targetSdkVersion 17
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+}
+
+dependencies {
+    compile project(':openCV240')
+    compile 'com.android.support:support-v4:18.0.0'
+    compile files('libs/jheader-0.1.jar')
+    compile files('libs/metadata-extractor-2.8.1.jar')
+    compile files('libs/sanselan-0.97-incubator.jar')
+
+
+}

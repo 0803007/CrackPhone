@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:theme="@android:style/Theme.Translucent.NoTitleBar"
+
+    android:layout_width="550dp"
+    android:layout_height="500dp"
+    android:layout_gravity="center_horizontal"
+    android:orientation="horizontal"
+    android:background="#9000"
+ >
+
+    <LinearLayout
+        android:layout_width="270dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="#0000">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#0000">
+            <Button
+                android:id="@+id/buttonORI"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ORI" />
+            <Button
+                android:id="@+id/buttonDLT"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DLT" />
+            <Button
+                android:id="@+id/buttonBIN"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BIN" />
+            <Button
+                android:id="@+id/buttonBINTHR"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BIN_THR" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#0000">
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#0000"
+                android:text="Adaptive Threshold:" />
+            <Button
+                android:id="@+id/buttonAdaptive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Set" />
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#0000">
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Block Size:" />
+
+            <Spinner
+                android:id="@+id/spinnerBlockSize"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp" />
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#0000">
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Param:" />
+
+            <Spinner
+                android:id="@+id/spinnerParam"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp" />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#0000"
+                android:text="Thin Size:" />
+
+            <EditText
+                android:id="@+id/editTextThinContourSize"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="number"
+                android:text="23"/> >
+            <Button
+                android:id="@+id/buttonThinContour"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Thin Contour" />
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#0000"
+                android:text="Threshold. \n Interval::"/>
+
+            <EditText
+                android:id="@+id/editTextThreshInterval"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="number"
+                android:text="50"/>
+            <Spinner
+                android:id="@+id/spinnerThreshInterval"
+                android:layout_width="100dp"
+                android:layout_height="50dp" />
+            <Button
+                android:id="@+id/buttonThreshInterval"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cal" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="#0000">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#0000"
+            android:weightSum="1">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#0000">
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Manual Threshold:" />
+
+            <EditText
+                android:id="@+id/editTextManual"
+                android:layout_width="57dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="number"
+                android:text="100" >
+
+                <requestFocus />
+            </EditText>
+                <Button
+                    android:id="@+id/buttonManual"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Set" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#0000">
+            <SeekBar
+                android:id="@+id/seekBarManual"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:max="255"
+                android:progress="100" />
+
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#0000">
+                <TextView
+                    android:id="@+id/textView5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Area Range:" />
+                <EditText
+                    android:id="@+id/editTextLower"
+                    android:layout_width="59dp"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="number"
+                    android:text="100" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="~" />
+                <EditText
+                    android:id="@+id/editTextUpper"
+                    android:layout_width="70dp"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="number"
+                    android:text="99999" />
+                <Button
+                    android:id="@+id/buttonAreaRange"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Set" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <SeekBar
+                    android:id="@+id/seekBarLower"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:max="1000"
+                    android:progress="100" />
+                <SeekBar
+                    android:id="@+id/seekBarUpper"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:max="99999"
+                    android:progress="99999" />
+            </LinearLayout>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <Button
+                    android:id="@+id/buttoContour"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Contour"
+                    />
+
+                <Button
+                    android:id="@+id/buttoFitEclipse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="FitEclipse"/>
+            </LinearLayout>
+
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#0000">
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#0000">
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

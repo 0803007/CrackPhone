@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="sanselan-0.97-incubator">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/crackPhone/libs/sanselan-0.97-incubator.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

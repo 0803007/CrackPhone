@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest package="nchc.crackphone"
+    android:versionCode="7"
+    android:versionName="0.27" xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-sdk
+        android:minSdkVersion="11"
+        android:targetSdkVersion="17" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+    <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL"/>
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme"
+        android:largeHeap="true">
+        <activity
+            android:name=".MainActivity"
+            android:hardwareAccelerated="true"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ImageShowActivity" />
+        <!--
+        <activity
+            android:name="com.example.crackphone.RedDeteciotnActivity"
+            android:label="@string/title_activity_red_deteciotn" >
+        </activity>
+        -->
+        <activity
+            android:name=".RedDetectionActivity"
+            android:label="@string/title_activity_red_detection" >
+        </activity>
+        <activity android:name=".CameraPreviewActivity"
+            android:label="@string/title_activity_camera_preview" >>
+         
+        </activity>
+
+    </application>
+
+</manifest>
