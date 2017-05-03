@@ -2583,7 +2583,7 @@ public class ImageShowActivity extends Activity{
 			String str = r + "," + g + "," + b;
 			mText.setText(str);
 			//mText.setText("裂縫好長............");*/
-			lineCalculate();
+			lineCalculate2();
             iv.invalidate();
 			break;
 		case MENU_SEMIAUTO:
@@ -2656,10 +2656,144 @@ public class ImageShowActivity extends Activity{
 		return super.onOptionsItemSelected(item);
 
 	}
+	/*
+	兩點連線搜尋裂縫寬度(新方法)
+	 */
+	public void lineCalculate2() {
+		if (iv.crackstart_x==0 && iv.crackstart_y==0 && iv.crackend_x==0 && iv.crackend_y==0 )
+		{
+			Toast.makeText(this, "無設定起終點座標", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		//default value
+		int nnn = 1000;
+		int xx[]=new int[nnn];
+		int yy[]=new int[nnn];
+		int zz[]=new int[nnn];
 
-    /**
-     *
-     */
+		ArrayList <PointF> vecLinePos = new ArrayList ();
+		ArrayList <Double> vecLineValue = new ArrayList ();
+		Mat gray = new Mat();
+		Mat img = new Mat();
+		Utils.bitmapToMat(mBitmap, img);
+		Imgproc.cvtColor(img,gray,Imgproc.COLOR_BGRA2GRAY, 4);
+		PointF s = new PointF(iv.crackstart_x, iv.crackstart_y);
+		PointF e = new PointF(iv.crackend_x, iv.crackend_y);
+		//取樣點
+		double LL2 = Math.sqrt((s.x - e.x)*(s.x - e.x) +  (s.y - e.y)*(s.y - e.y));
+		//從起始點開始內插找點 1cm 2cm 3cm.....
+		PointF pt;
+		double si = Double.parseDouble(mStdText.getText().toString());   //從UI擷取值
+		Imgproc.equalizeHist(gray,gray);//也可以用Imgproc.medianBlur(gray, gray, 5);
+		ArrayList<Double> vecSortValue = new ArrayList();
+
+		//雙線性內插
+		for (int i = 0;i<nnn;i++){
+			pt = lineInterp(s, e, LL2/nnn);
+			double x1 = (Math.floor(pt.x)+1.0-pt.x)*gray.get((int)Math.floor(pt.y), (int)Math.floor(pt.x))[0] + (pt.x -  Math.floor(pt.x)) * gray.get((int)Math.floor(pt.y), (int)Math.floor(pt.x)+1)[0];//x1方向內插
+			double x2 = (Math.floor(pt.x)+1.0-pt.x)*gray.get((int)Math.floor(pt.y)+1, (int)Math.floor(pt.x))[0] + (pt.x -  Math.floor(pt.x)) * gray.get((int)Math.floor(pt.y+1), (int)Math.floor(pt.x)+1)[0];//x2方向內插
+			double y1 =  (Math.floor(pt.y)+1.0-pt.y)*x1 + (pt.y -  Math.floor(pt.y)) *x2;//y方向內插
+			vecSortValue.add(255-y1); //inverse image 255<->0　黑色=255,白色=0
+			vecLinePos.add(pt);
+			vecLineValue.add(255-y1); //inverse image 255<->0　黑色=255,白色=0
+		}
+
+		//Sorting後取樣前20%做平均 再取最大值作為基準
+		double endsize = 0.2 * nnn;
+		double total = 0.0f;
+		double max_invzz = 0.0f;
+		double base_invzz = 0.0f;
+		//Sorting
+		Collections.sort(vecSortValue, new Comparator<Double>() {
+			@Override
+			public int compare(Double f1, Double f2) {  //small->large
+				if(f1>f2) {
+					return 1;
+				}
+				return -1;
+			}
+		});
+		//判斷取樣點不足
+		if (vecSortValue.size()<endsize)	{
+			Toast.makeText(this, "取樣點不足200個,建議拉長", Toast.LENGTH_SHORT).show();
+			endsize = vecSortValue.size();
+		}
+
+		//Max Value & average
+		for (int i=0;i<endsize;i++){
+			total+=vecSortValue.get(i);
+			if (max_invzz > vecSortValue.get(i))
+				max_invzz =  vecSortValue.get(i);
+		}
+		base_invzz = total / endsize;
+
+		//diffusion point R & L (=0.5(peak+base))
+		double diff_ratio = 0.45f;  //參數3: 虛邊界修正
+		double	diff_invzz = diff_ratio*(max_invzz-base_invzz)+base_invzz;
+		int diff_pt_L=1;
+		int diff_pt_R=1;
+
+		//從左邊搜尋
+		int index_L = 0;
+		int num = vecLineValue.size();
+		for (int i = 3; i < num-3; i++)
+		{
+			if (vecLineValue.get(i) < diff_invzz && vecLineValue.get(i+1) >= diff_invzz && index_L==0)
+			{
+				diff_pt_L = i+1; //diffusion pt 的左邊界點
+				index_L = 1;
+			}
+		}
+
+		//從右邊搜尋
+		int index_R = 0;
+		for (int i = num-3; i > 3; i--)
+		{
+			if (vecLineValue.get(i) >= diff_invzz && vecLineValue.get(i+1) < diff_invzz && index_R==0)
+			{
+				diff_pt_R = i; // %diffusion pt 的右邊界點
+				index_R = 1;
+			}
+		}
+
+		//non-linear container, diffusion 修正
+		// 計算diffusion point 範圍內的容積 (base_invzz以上)
+		int aaa = 10; // 參數4: non-linear factor
+		int	GH = 210; // 參數5: 大於GH才修正(大於GH即視為裂縫，不修正)
+		int dw_pt_L = 1;
+		int dw_pt_R = nnn;
+		double total_dw = 0.0f;
+		double dw_A1 = 0.0f;
+		for (int i=diff_pt_L; i<diff_pt_R; i++){
+			if (vecLineValue.get(i)  > GH) {
+				dw_A1 = LL2; //表示已經是飽和的裂縫，不用再補滿
+				total_dw = total_dw + dw_A1;
+			}else {
+				double GP = vecLineValue.get(i) ;
+				double R = (GP - base_invzz) / (GH - base_invzz);
+				dw_A1 = (2 + (aaa - 1) * R) * R / (aaa + 1) * LL2; //LL2是一個di所代表的mm; %裂縫寬(mm)
+				total_dw = total_dw + dw_A1;
+			}
+		}
+
+		//標記裂縫位置
+		PointF L = new PointF();
+		PointF R = new PointF();
+		L.x =  vecLinePos.get(diff_pt_L).x;
+		L.y =  vecLinePos.get(diff_pt_L).y;
+		R.x =  vecLinePos.get(diff_pt_R).x;
+		R.y =  vecLinePos.get(diff_pt_R).y;
+		iv.mInterpPTLeft = L;
+		iv.mInterpPTRight = R;
+
+		//清除記憶體
+		gray.release();
+		img.release();
+		vecSortValue.clear();
+	}
+	/*
+	 兩點連線搜尋裂縫寬度
+	 */
 	public void lineCalculate() {
 		if (iv.crackstart_x==0 && iv.crackstart_y==0 && iv.crackend_x==0 && iv.crackend_y==0 )
 		{
@@ -2678,60 +2812,15 @@ public class ImageShowActivity extends Activity{
 		double len = Math.sqrt((s.x - e.x)*(s.x - e.x) + (s.y - e.y)*(s.y - e.y));
 		//從起始點開始內插找點 1cm 2cm 3cm.....
 		PointF pt;
-		double []v;
-		double total = 0.0f;
-		double avg = 0.0f;
-		//double si = 0.0f;
 		double si = Double.parseDouble(mStdText.getText().toString());   //從UI擷取值
-		//Imgproc.medianBlur(gray, gray, 5);
-		Imgproc.equalizeHist(gray,gray);
+		Imgproc.equalizeHist(gray,gray);//也可以用Imgproc.medianBlur(gray, gray, 5);
 		ArrayList<Double> vecTotalValue = new ArrayList();
 
-		for (int i = 0;i<len*10;i++){
+		for (int i=0; i<len*10; i++){
 			pt = lineInterp(s, e, i*0.1);
-			//pt.x = Math.round(pt.x);
-			//pt.y = Math.round(pt.y);
-			v = gray.get(Math.round(pt.y - 0.5f), Math.round(pt.x-0.5f));
 
-			/*
-			//多取樣附近八點做平均
-			v = gray.get(Math.round(pt.y-1), Math.round(pt.x-1));
-			vecTotalValue.add((int)v[0]);
-			total = total + v[0];
+			//多取樣附近八點做平均 (2017/05/03刪除)
 
-			v = gray.get(Math.round(pt.y-1), Math.round(pt.x));
-			vecTotalValue.add((int)v[0]);
-			total = total + v[0];
-
-			v = gray.get(Math.round(pt.y-1), Math.round(pt.x+1));
-			vecTotalValue.add((int)v[0]);
-			total = total + v[0];
-
-			v = gray.get(Math.round(pt.y), Math.round(pt.x-1));
-			vecTotalValue.add((int)v[0]);
-			total = total + v[0];
-
-			v = gray.get(Math.round(pt.y), Math.round(pt.x));
-			vecTotalValue.add((int)v[0]);
-			total = total + v[0];
-
-			v = gray.get(Math.round(pt.y), Math.round(pt.x+1));
-			vecTotalValue.add((int)v[0]);
-			total = total + v[0];
-
-
-			v = gray.get(Math.round(pt.y+1), Math.round(pt.x-1));
-			vecTotalValue.add((int)v[0]);
-			total = total + v[0];
-
-			v = gray.get(Math.round(pt.y+1), Math.round(pt.x));
-			vecTotalValue.add((int)v[0]);
-			total = total + v[0];
-
-			v = gray.get(Math.round(pt.y+1), Math.round(pt.x+1));
-			vecTotalValue.add((int)v[0]);
-			total = total + v[0];
-			*/
 			//雙線性內插
 			double x1 = (Math.floor(pt.x)+1.0-pt.x)*gray.get((int)Math.floor(pt.y), (int)Math.floor(pt.x))[0] + (pt.x -  Math.floor(pt.x)) * gray.get((int)Math.floor(pt.y), (int)Math.floor(pt.x)+1)[0];//x1方向內插
 			double x2 = (Math.floor(pt.x)+1.0-pt.x)*gray.get((int)Math.floor(pt.y)+1, (int)Math.floor(pt.x))[0] + (pt.x -  Math.floor(pt.x)) * gray.get((int)Math.floor(pt.y+1), (int)Math.floor(pt.x)+1)[0];//x2方向內插
@@ -2740,136 +2829,8 @@ public class ImageShowActivity extends Activity{
 			vecLinePos.add(pt);
 			vecLineValue.add(y1);
 		}
-		/*
-		//取樣前30*10做平均  (10是subpixel)
-		Collections.sort(vecTotalValue, new Comparator<Double>() {
-			@Override
-			public int compare(Double f1, Double f2) {  //small->large
-				if(f1>f2) {
-					return 1;
-				}
-				return -1;
-			}
-		});
-		int endsize = 200*10;
-		if (vecTotalValue.size()<200*10)	{
-			Toast.makeText(this, "取樣點不足200個,建議拉長", Toast.LENGTH_SHORT).show();
-		    endsize = vecTotalValue.size();
-		}
-	    for (int i=0;i<endsize;i++){
-			total = total + vecTotalValue.get(i);
-		}
-		avg = total / endsize;                 //平均數
-		total = 0;
-		for (int i = 0; i < endsize; i++)
-			total = total + (avg - vecTotalValue.get(i))*(avg - vecTotalValue.get(i));
 
-		si = Math.sqrt(total / endsize);    //標準差
-		//計算裂縫的範圍,兩種方法找到邊界點
-		int num = vecLineValue.size();
-		int posL = 0;
-		int posR = 0;
-		//double fSTD = 1.0f;         //預設一個標準差
-		double fSTD = Double.parseDouble(mStdText.getText().toString());
-		boolean isMinToBorder = true;
-
-
-		if (isMinToBorder == true)
-		{   //第一種方法:由最低點向外搜尋
-			int posMin = 0;
-			double fValuse = 255.0;
-			for (int i = 1; i < num-1; i++)
-			{
-				if (vecLineValue.get(i) < fValuse)                  //計算像亮中的最小值
-				{
-					fValuse = vecLineValue.get(i);
-					posMin = i;
-				}
-			}
-			for (int i = posMin; i > 1; i--)
-			{
-				if (vecLineValue.get(i) > avg - si*fSTD )     //判斷是否大於N個標準差
-				{
-					posL = i+1;                                 //要加回來
-					//posL = i;
-					break;
-				}
-			}
-			for (int i = posMin; i < num; i++)
-			{
-				if (vecLineValue.get(i) > avg - si*fSTD )     //判斷是否大於N個標準差
-				{
-					posR = i;                                //要減回來
-					//posR = i;                                    //一邊撿回來一邊就不用加
-					break;
-				}
-			}
-		}else
-		{    //第二種方法:由頭尾點向內搜尋
-			for (int i = 3; i < num-3; i++)
-			{
-				if (vecLineValue.get(i) < avg - si*fSTD )     //判斷是否大於N個標準差
-				{
-					//posL = i-1;                                 //要減回來
-					posL = i;                                     //一邊撿回來一邊就不用加
-					break;
-				}
-			}
-			for (int i = num-3; i > 3; i--)
-			{
-				if (vecLineValue.get(i) < avg - si*fSTD )     //判斷是否大於N個標準差
-				{
-					posR = i+1;                                 //要加回來
-					break;
-				}
-			}
-		}
-		//裂縫的長度
-		double len_crack = 0.0f;
-		PointF L = new PointF();
-		PointF R = new PointF();
-		boolean isSubpixel = false;
-		if (isSubpixel == true)    //判斷是否需要內差至subpixel
-		{
-			if (vecLineValue.get(posL-1) == vecLineValue.get(posL) || vecLineValue.get(posR+1) == vecLineValue.get(posR) )   //避免分母為0
-			{
-				L.x =  vecLinePos.get(posL).x;                                                                                                                                           //無內插
-				L.y =  vecLinePos.get(posL).y;
-				R.x =  vecLinePos.get(posR).x;
-				R.y =  vecLinePos.get(posR).y;
-			}else
-			{
-				double tempLX = (vecLineValue.get(posL-1) - (avg-si*fSTD))/(vecLineValue.get(posL-1) - vecLineValue.get(posL) *(vecLinePos.get(posL).x - vecLinePos.get(posL-1).x));
-				double tempLY = (vecLineValue.get(posL-1) - (avg-si*fSTD))/(vecLineValue.get(posL-1) - vecLineValue.get(posL) *(vecLinePos.get(posL).y - vecLinePos.get(posL-1).y));
-				double tempRX =  ((avg-si*fSTD) - vecLineValue.get(posR))/(vecLineValue.get(posR+1) - vecLineValue.get(posR)) *(vecLinePos.get(posR+1).x - vecLinePos.get(posR).x);
-				double tempRY =  ((avg-si*fSTD) - vecLineValue.get(posR))/(vecLineValue.get(posR+1) - vecLineValue.get(posR)) *(vecLinePos.get(posR+1).y - vecLinePos.get(posR).y);
-				L.x = (float) (vecLinePos.get(posL-1).x + tempLX);       //內插到subpixel
-				L.y = (float) (vecLinePos.get(posL-1).y + tempLY);
-				R.x = (float) (vecLinePos.get(posR).x + tempRX);
-				R.y = (float) (vecLinePos.get(posR).y + tempRY);
-			}
-		}
-		else
-		{
-			L.x =  vecLinePos.get(posL).x;                                                                                                                                           //無內插
-			L.y =  vecLinePos.get(posL).y;
-			R.x =  vecLinePos.get(posR).x;
-			R.y =  vecLinePos.get(posR).y;
-		}
-		len_crack = Math.sqrt((L.x - R.x) * (L.x - R.x) + (L.y - R.y) * (L.y - R.y));
-
-
-		iv.mInterpPTLeft.x = L.x;
-		iv.mInterpPTLeft.y =  L.y;
-		iv.mInterpPTRight.x =  R.x;
-		iv.mInterpPTRight.y =  R.y;
-		*/
-
-		//顯示所有的長度資訊
-		/*STDWidthLabel->Caption = FloatToStrF(si,ffFixed,12,2);
-		MeanValueLabel->Caption = FloatToStrF(avg,ffFixed,12,2);
-		TotalValueLabel->Caption = FloatToStrF(len,ffFixed,12,2) / pow(10,MainlForm->m_DataSet->nCMUnit);           //換算單位cm
-		CrackWidthLabel->Caption = FloatToStrF(len_crack,ffFixed,12,2) / pow(10,MainlForm->m_DataSet->nCMUnit-1);   //換算單位mm*/
+		//裂縫長度計算
 		double len_crack = SemiAutoExtraction.getProfileCrackWidth(vecLineValue,vecLinePos, si, iv.mInterpPTLeft, iv.mInterpPTRight);
 		//扣除掉微小震動 - 1pixel
 		len_crack = len_crack -1;
@@ -2879,9 +2840,6 @@ public class ImageShowActivity extends Activity{
 		mLogText.setText(str);
 
 		//清除記憶體
-		/*vecLinePos.clear();
-		vecLineValue.clear();
-		cvReleaseImage(&gray);*/
 		gray.release();
 		img.release();
 		vecTotalValue.clear();
