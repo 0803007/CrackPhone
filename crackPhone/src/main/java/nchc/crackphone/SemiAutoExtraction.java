@@ -625,7 +625,7 @@ public class SemiAutoExtraction {
 		{
 			if (vecLineValue.get(posL-1) == vecLineValue.get(posL) || vecLineValue.get(posR+1) == vecLineValue.get(posR) )   //避免分母為0
 			{
-				L.x =  vecLinePos.get(posL).x;                                                                                                                                           //無內插
+				L.x =  vecLinePos.get(posL).x; //無內插
 				L.y =  vecLinePos.get(posL).y;
 				R.x =  vecLinePos.get(posR).x;
 				R.y =  vecLinePos.get(posR).y;

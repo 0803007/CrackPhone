@@ -315,6 +315,12 @@ public class ImageShowActivity extends Activity{
 	public int mStatusDisplay = 0;
 	private boolean bResizeImage = false;
 
+	//classs
+	class Vectordata{
+		PointF pt = new PointF();
+		double value = 0.0f;
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -2684,15 +2690,16 @@ public class ImageShowActivity extends Activity{
 		//從起始點開始內插找點 1cm 2cm 3cm.....
 		PointF pt;
 		double si = Double.parseDouble(mStdText.getText().toString());   //從UI擷取值
-		Imgproc.equalizeHist(gray,gray);//也可以用Imgproc.medianBlur(gray, gray, 5);
+		//Imgproc.equalizeHist(gray,gray);//也可以用Imgproc.medianBlur(gray, gray, 5);
 		ArrayList<Double> vecSortValue = new ArrayList();
 
 		//雙線性內插
 		for (int i = 0;i<nnn;i++){
-			pt = lineInterp(s, e, LL2/nnn);
+			pt = lineInterp(s, e, i*LL2/(double)nnn);
 			double x1 = (Math.floor(pt.x)+1.0-pt.x)*gray.get((int)Math.floor(pt.y), (int)Math.floor(pt.x))[0] + (pt.x -  Math.floor(pt.x)) * gray.get((int)Math.floor(pt.y), (int)Math.floor(pt.x)+1)[0];//x1方向內插
 			double x2 = (Math.floor(pt.x)+1.0-pt.x)*gray.get((int)Math.floor(pt.y)+1, (int)Math.floor(pt.x))[0] + (pt.x -  Math.floor(pt.x)) * gray.get((int)Math.floor(pt.y+1), (int)Math.floor(pt.x)+1)[0];//x2方向內插
 			double y1 =  (Math.floor(pt.y)+1.0-pt.y)*x1 + (pt.y -  Math.floor(pt.y)) *x2;//y方向內插
+
 			vecSortValue.add(255-y1); //inverse image 255<->0　黑色=255,白色=0
 			vecLinePos.add(pt);
 			vecLineValue.add(255-y1); //inverse image 255<->0　黑色=255,白色=0
@@ -2722,14 +2729,14 @@ public class ImageShowActivity extends Activity{
 		//Max Value & average
 		for (int i=0;i<endsize;i++){
 			total+=vecSortValue.get(i);
-			if (max_invzz > vecSortValue.get(i))
+			if (max_invzz < vecSortValue.get(i))
 				max_invzz =  vecSortValue.get(i);
 		}
 		base_invzz = total / endsize;
 
 		//diffusion point R & L (=0.5(peak+base))
 		double diff_ratio = 0.45f;  //參數3: 虛邊界修正
-		double	diff_invzz = diff_ratio*(max_invzz-base_invzz)+base_invzz;
+		double	diff_invzz = diff_ratio*(max_invzz+base_invzz)+base_invzz;
 		int diff_pt_L=1;
 		int diff_pt_R=1;
 
