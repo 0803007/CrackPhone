@@ -185,6 +185,11 @@ public class ImageShowActivity extends Activity{
 	//┾盤
 	private Button mContoursButton;
 	private Button mThinButton;
+	private EditText mNnnText;
+	private EditText mBaseLineThresholdText;
+	private EditText mDiffRatioText;
+	private EditText mAaaText;
+	private EditText mGHText;
 
 	//Dialog
 	private Spinner mParamSpinner;
@@ -554,6 +559,11 @@ public class ImageShowActivity extends Activity{
 		RRGBTextView = (TextView)findViewById(R.id.RRGBTextView);
 		GRGBTextView = (TextView)findViewById(R.id.GRGBTextView);
 		mA4HWButton = (Button)findViewById(R.id.button12);
+		mNnnText = (EditText)findViewById(R.id.nnnEditText);
+		mBaseLineThresholdText = (EditText)findViewById(R.id.baseLineThresholdEditText);
+		mDiffRatioText = (EditText)findViewById(R.id.diffRatioEditText);
+		mAaaText = (EditText)findViewById(R.id.aaaEditText);
+		mGHText = (EditText)findViewById(R.id.gHEditText);
 
 		//A4ThresholdDialog
 		mA4SeekBar = (SeekBar)mA4ThresholdDlg.findViewById(R.id.a4SeekBar);
@@ -595,8 +605,6 @@ public class ImageShowActivity extends Activity{
 		mManualSeekBar.setOnSeekBarChangeListener(manualseekBarOnChangeLis);
 		mLowerSeekBar.setOnSeekBarChangeListener(lowerseekBarOnChangeLis);
 		mUpperSeekBar.setOnSeekBarChangeListener(upperseekBarOnChangeLis);
-
-
 
 		mA4HWButton.setOnClickListener(new Button.OnClickListener() {
 			@Override
@@ -1618,7 +1626,6 @@ public class ImageShowActivity extends Activity{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
 
 			//陪ボ秈bar
 			nProgressStatus = 0;                                        //秈bar篈
@@ -2672,7 +2679,8 @@ public class ImageShowActivity extends Activity{
 			return;
 		}
 		//default value
-		int nnn = 1000;
+		int nnn = Integer.parseInt(mNnnText.getText().toString());  //把计1 default 1000
+		double base_line_threshold = Double.parseDouble(mBaseLineThresholdText.getText().toString()); //把计2 default 0.2
 		int xx[]=new int[nnn];
 		int yy[]=new int[nnn];
 		int zz[]=new int[nnn];
@@ -2707,7 +2715,7 @@ public class ImageShowActivity extends Activity{
 		}
 
 		//Sorting妓玡20%暗キА 程膀非
-		double endsize = 0.2 * nnn;
+		double endsize = base_line_threshold * nnn;
 		double total = 0.0f;
 		double max_invzz = 0.0f;
 		double base_invzz = 0.0f;
@@ -2736,7 +2744,7 @@ public class ImageShowActivity extends Activity{
 		base_invzz = total / endsize;
 
 		//diffusion point R & L (=0.5(peak+base))
-		double diff_ratio = 0.45f;  //把计3: 店娩タ
+		double diff_ratio = Double.parseDouble(mDiffRatioText.getText().toString()); //把计3: 店娩タ  default 0.45f
 		double diff_invzz = diff_ratio*(max_invzz-base_invzz)+base_invzz;
 		int diff_pt_L=1;
 		int diff_pt_R=1;
@@ -2766,8 +2774,8 @@ public class ImageShowActivity extends Activity{
 
 		//non-linear container, diffusion タ
 		// 璸衡diffusion point 絛瞅ず甧縩 (base_invzz)
-		int aaa = 10; // 把计4: non-linear factor
-		int	GH = 210; // 把计5: GHタ(GH跌吊羅ぃタ)
+		double aaa = Double.parseDouble(mAaaText.getText().toString()); // 把计4: non-linear factor default:10
+		double GH = Double.parseDouble(mGHText.getText().toString()); // 把计5: GHタ(GH跌吊羅ぃタ) default :210
 		int dw_pt_L = 1;
 		int dw_pt_R = nnn;
 		double total_dw = 0.0f;
@@ -2776,7 +2784,7 @@ public class ImageShowActivity extends Activity{
 			if (vecLineValue.get(i)  > GH) {
 				dw_A1 = LL2; //ボ竒琌埂㎝吊羅ぃノ干骸
 				total_dw = total_dw + dw_A1;
-			}else {
+			}else{
 				double GP = vecLineValue.get(i) ;
 				double R = (GP - base_invzz) / (GH - base_invzz);
 				dw_A1 = (2 + (aaa - 1) * R) * R / (aaa + 1) * LL2; //LL2琌di┮mm; %吊羅糴(mm)
