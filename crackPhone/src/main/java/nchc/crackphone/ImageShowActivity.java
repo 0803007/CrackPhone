@@ -2668,7 +2668,7 @@ public class ImageShowActivity extends Activity{
 	public void lineCalculate2() {
 		if (iv.crackstart_x==0 && iv.crackstart_y==0 && iv.crackend_x==0 && iv.crackend_y==0 )
 		{
-			Toast.makeText(this, "無設定起終點座標", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "無設定起終點座標!!!!", Toast.LENGTH_SHORT).show();
 			return;
 		}
 		//default value
