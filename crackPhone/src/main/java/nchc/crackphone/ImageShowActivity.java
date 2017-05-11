@@ -2691,6 +2691,7 @@ public class ImageShowActivity extends Activity{
 		PointF pt;
 		double si = Double.parseDouble(mStdText.getText().toString());   //從UI擷取值
 		//Imgproc.equalizeHist(gray,gray);//也可以用Imgproc.medianBlur(gray, gray, 5);
+		Imgproc.medianBlur(gray, gray, 7);
 		ArrayList<Double> vecSortValue = new ArrayList();
 
 		//雙線性內插
@@ -2713,11 +2714,11 @@ public class ImageShowActivity extends Activity{
 		//Sorting
 		Collections.sort(vecSortValue, new Comparator<Double>() {
 			@Override
-			public int compare(Double f1, Double f2) {  //small->large
-				if(f1>f2) {
-					return 1;
-				}
-				return -1;
+			public int compare(Double f1, Double f2) {  //large->small
+			if(f1<f2) {
+				return 1;
+			}
+			return -1;
 			}
 		});
 		//判斷取樣點不足
@@ -2736,7 +2737,7 @@ public class ImageShowActivity extends Activity{
 
 		//diffusion point R & L (=0.5(peak+base))
 		double diff_ratio = 0.45f;  //參數3: 虛邊界修正
-		double	diff_invzz = diff_ratio*(max_invzz+base_invzz)+base_invzz;
+		double diff_invzz = diff_ratio*(max_invzz-base_invzz)+base_invzz;
 		int diff_pt_L=1;
 		int diff_pt_R=1;
 
