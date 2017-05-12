@@ -379,10 +379,10 @@ public class ImageShowActivity extends Activity{
 
 		//如果影像太大 縮小影像 (GC100只有512mb記憶體)
 		//建議使用Webview無限制大小 or 切成塊狀影像
-		//記憶體小於768MB影像 && 不是OpenGL3.0 && 影像超出4096 resize
+		//記憶體小於768MB影像 && 不是OpenGL3.0 && 影像超出2048 resize
 		//if (mBitmap.getWidth()>3000||mBitmap.getHeight()>3000)   // <--gc100也不夠
 		if (gl_version < 0x00020001)    //0x00020001  OpenGL2.1
-			if (mBitmap.getWidth()>4096||mBitmap.getHeight()>4096)
+			if (mBitmap.getWidth()>2048||mBitmap.getHeight()>2048)
 				if(memoryInfo.totalMem < 7680*1024*1024)	{
 					AlertDialog.Builder builder = new AlertDialog.Builder(this);
 					builder.setMessage("OpenGL版本太舊 記憶體太小 影像超出4096 縮小影像?").setPositiveButton("Yes",
@@ -2722,8 +2722,8 @@ public class ImageShowActivity extends Activity{
 		//Sorting
 		Collections.sort(vecSortValue, new Comparator<Double>() {
 			@Override
-			public int compare(Double f1, Double f2) {  //large->small
-			if(f1<f2) {
+			public int compare(Double f1, Double f2) {  //smallsun->large
+			if(f1>f2) {
 				return 1;
 			}
 			return -1;
@@ -2736,10 +2736,13 @@ public class ImageShowActivity extends Activity{
 		}
 
 		//Max Value & average
-		for (int i=0;i<endsize;i++){
-			total+=vecSortValue.get(i);
+		for (int i=0;i<nnn;i++){
 			if (max_invzz < vecSortValue.get(i))
 				max_invzz =  vecSortValue.get(i);
+		}
+
+		for (int i=0;i<endsize;i++){
+			total+=vecSortValue.get(i);
 		}
 		base_invzz = total / endsize;
 
@@ -3349,14 +3352,14 @@ public class ImageShowActivity extends Activity{
     	Bitmap resizedBitmap;
     	if (width>height)
     	{
-    		//matrix.postScale(3900/(float)width, 3900/(float)width);
-			matrix.postScale(3000/(float)width, 3000/(float)width);
+    		//matrix.postScale(3000/(float)width, 3000/(float)width);
+			matrix.postScale(2000/(float)width, 2000/(float)width);
     		resizedBitmap = Bitmap.createBitmap(bmp, 0, 0, width, height, matrix, true);
 
     	}else
     	{
-    		//matrix.postScale(3900/(float)height, 3900/(float)height);
-			matrix.postScale(3000/(float)height, 3000/(float)height);
+    		//matrix.postScale(3000/(float)height, 3000/(float)height);
+			matrix.postScale(2000/(float)height, 2000/(float)height);
     		resizedBitmap = Bitmap.createBitmap(bmp, 0, 0, width, height, matrix, true);
     	}
     	bmp.recycle();
