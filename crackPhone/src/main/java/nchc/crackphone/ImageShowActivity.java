@@ -2790,10 +2790,11 @@ public class ImageShowActivity extends Activity{
 			}else{
 				double GP = vecLineValue.get(i) ;
 				double R = (GP - base_invzz) / (GH - base_invzz);
-				dw_A1 = (2 + (aaa - 1) * R) * R / (aaa + 1) * LL2; //LL2是一個di所代表的mm; %裂縫寬(mm)
+				dw_A1 = (2 + (aaa - 1) * R) * R / (aaa + 1) * LL2 ; //LL2是一個di所代表的mm; %裂縫寬(mm)
 				total_dw = total_dw + dw_A1;
 			}
 		}
+		total_dw = total_dw / (nnn-1); //修正累加
 
 		//標記裂縫位置
 		PointF L = new PointF();
@@ -2808,9 +2809,9 @@ public class ImageShowActivity extends Activity{
         iv.mInterpPTRight.y =  R.y;
 
 		//裂縫長度計算
-        double len_crack = Math.sqrt((L.x - R.x) * (L.x - R.x) + (L.y - R.y) * (L.y - R.y));
+        double len_crack = total_dw; //原本是用未修正 現在改為修正後
 		//扣除掉微小震動 - 1pixel
-		len_crack = len_crack -1;
+		//len_crack = len_crack -1;
 		//傳送長度
 		DecimalFormat df = new DecimalFormat("#.##");
 		String str = "寬度 = " +  df.format(len_crack / mScale) + "mm";
