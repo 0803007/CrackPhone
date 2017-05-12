@@ -157,7 +157,7 @@
                         android:layout_height="wrap_content"
                         android:digits="1234567890.-"
                         android:inputType="date"
-                        android:text="21" />
+                        android:text="210" />
                 </TableRow>
             </TableLayout>
             <Button

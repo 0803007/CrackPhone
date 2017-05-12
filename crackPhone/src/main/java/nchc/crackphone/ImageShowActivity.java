@@ -2680,7 +2680,7 @@ public class ImageShowActivity extends Activity{
 		}
 		//default value
 		int nnn = Integer.parseInt(mNnnText.getText().toString());  //參數1 default 1000
-		double base_line_threshold = Double.parseDouble(mBaseLineThresholdText.getText().toString()); //參數2 default 0.2
+        double base_line_threshold = Double.parseDouble(mBaseLineThresholdText.getText().toString()); //參數2 default 0.2
 		int xx[]=new int[nnn];
 		int yy[]=new int[nnn];
 		int zz[]=new int[nnn];
@@ -2699,7 +2699,7 @@ public class ImageShowActivity extends Activity{
 		PointF pt;
 		double si = Double.parseDouble(mStdText.getText().toString());   //從UI擷取值
 		//Imgproc.equalizeHist(gray,gray);//也可以用Imgproc.medianBlur(gray, gray, 5);
-		Imgproc.medianBlur(gray, gray, 7);
+		Imgproc.medianBlur(gray, gray, 5);
 		ArrayList<Double> vecSortValue = new ArrayList();
 
 		//雙線性內插
@@ -2767,7 +2767,7 @@ public class ImageShowActivity extends Activity{
 		{
 			if (vecLineValue.get(i) >= diff_invzz && vecLineValue.get(i+1) < diff_invzz && index_R==0)
 			{
-				diff_pt_R = i; // %diffusion pt 的右邊界點
+                diff_pt_R = i; // %diffusion pt 的右邊界點
 				index_R = 1;
 			}
 		}
@@ -2799,8 +2799,19 @@ public class ImageShowActivity extends Activity{
 		L.y =  vecLinePos.get(diff_pt_L).y;
 		R.x =  vecLinePos.get(diff_pt_R).x;
 		R.y =  vecLinePos.get(diff_pt_R).y;
-		iv.mInterpPTLeft = L;
-		iv.mInterpPTRight = R;
+        iv.mInterpPTLeft.x = L.x;
+        iv.mInterpPTLeft.y =  L.y;
+        iv.mInterpPTRight.x =  R.x;
+        iv.mInterpPTRight.y =  R.y;
+
+		//裂縫長度計算
+        double len_crack = Math.sqrt((L.x - R.x) * (L.x - R.x) + (L.y - R.y) * (L.y - R.y));
+		//扣除掉微小震動 - 1pixel
+		len_crack = len_crack -1;
+		//傳送長度
+		DecimalFormat df = new DecimalFormat("#.##");
+		String str = "寬度 = " +  df.format(len_crack / mScale) + "mm";
+		mLogText.setText(str);
 
 		//清除記憶體
 		gray.release();
