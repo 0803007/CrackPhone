@@ -164,13 +164,15 @@
                 android:id="@+id/contoursButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Contours" />
+                android:text="Contours"
+                android:visibility="invisible"/>
 
             <Button
                 android:id="@+id/thinButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Button" />
+                android:text="Button"
+                android:visibility="invisible"/>
             
         </LinearLayout>
     </SlidingDrawer>
@@ -230,7 +232,7 @@
                     android:id="@+id/tableRow16"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" >
-                                        <TextView
+                    <TextView
                         android:id="@+id/textView8"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
