@@ -381,9 +381,9 @@ public class ImageShowActivity extends Activity{
 		//建議使用Webview無限制大小 or 切成塊狀影像
 		//記憶體小於768MB影像 && 不是OpenGL3.0 && 影像超出2048 resize
 		//if (mBitmap.getWidth()>3000||mBitmap.getHeight()>3000)   // <--gc100也不夠
-		if (gl_version < 0x00020001)    //0x00020001  OpenGL2.1
+		//if (gl_version < 0x00020001)    //0x00020001  OpenGL2.1
 			if (mBitmap.getWidth()>2048||mBitmap.getHeight()>2048)
-				if(memoryInfo.totalMem < 7680*1024*1024)	{
+				if((double)memoryInfo.totalMem < (double)7680*1024*1024)	{
 					AlertDialog.Builder builder = new AlertDialog.Builder(this);
 					builder.setMessage("OpenGL版本太舊 記憶體太小 影像超出4096 縮小影像?").setPositiveButton("Yes",
 							new DialogInterface.OnClickListener() {
@@ -2722,11 +2722,14 @@ public class ImageShowActivity extends Activity{
 		//Sorting
 		Collections.sort(vecSortValue, new Comparator<Double>() {
 			@Override
-			public int compare(Double f1, Double f2) {  //smallsun->large
-			if(f1>f2) {
-				return 1;
-			}
-			return -1;
+			public int compare(Double f1, Double f2) {  //small->large
+				if(f1>f2) {
+					return 1;
+				}
+				if(f1.equals(f2)) {   //相等時return0 不然會出錯
+					return 0;
+				}
+				return -1;
 			}
 		});
 		//判斷取樣點不足
@@ -2789,7 +2792,7 @@ public class ImageShowActivity extends Activity{
 				total_dw = total_dw + dw_A1;
 			}else{
 				double GP = vecLineValue.get(i) ;
-				double R = (GP - base_invzz) / (GH - base_invzz);
+				double R = (GP - base_invzz) / (GH - base_invzz + 0.001);
 				dw_A1 = (2 + (aaa - 1) * R) * R / (aaa + 1) * LL2 ; //LL2是一個di所代表的mm; %裂縫寬(mm)
 				total_dw = total_dw + dw_A1;
 			}
